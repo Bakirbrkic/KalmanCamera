@@ -10,14 +10,14 @@ Page {
         id: webSocket
         //url: //"ws://"+ip.localIP+":12350"
         onTextMessageReceived: {
-            console.log("[T] Received message: " + message);
+            console.log("[SOCKET][TEXT] Received message: " + message);
         }
 
         onBinaryMessageReceived: {
-            console.log("[B] Received message: " + message);
+            console.log("[SOCKET][BINARY] Received message: " + message);
         }
         onStatusChanged: if (webSocket.status == WebSocket.Error) {
-                             console.log("Error: " + webSocket.errorString)
+                             console.log("[SOCKET] Error: " + webSocket.errorString)
                          } else if (webSocket.status == WebSocket.Open) {
                             console.log("[SOCKET] Socket is open!");
                          } else if (webSocket.status == WebSocket.Closed) {
@@ -41,10 +41,8 @@ Page {
                 //webSocket.sendTextMessage("1");
             }
             onImageSaved: {
-                //console.log("saved to: " + path);
-                var ba = JSON.stringify(photoPreview.data);
-                console.log("[PHOTO PREVIEW] data: " + ba);
-                webSocket.sendBinaryMessage(ba);
+                console.log("[CAMERA] saved to: " + path);
+                //webSocket.sendBinaryMessage(ba);
             }
         }
 
@@ -55,14 +53,14 @@ Page {
 
         onCameraStatusChanged: {
             if(camera.cameraStatus == Camera.LoadedStatus){
-                console.log("Loaded" + camera.cameraStatus);
+                console.log("[CAMERA] loaded" + camera.cameraStatus);
                 var res = camera.imageCapture.supportedResolutions;
                 camera.imageCapture.resolution = res[0];//res[Math.floor(res.length/4)];
                 //camera.imageCapture.capture();
-                console.log("Resolution is: " + camera.imageCapture.resolution);
+                console.log("[CAMERA] resolution is: " + camera.imageCapture.resolution);
             }
             else
-                console.log("CS: " + camera.cameraStatus);
+                console.log("[CAMERA] camera status: " + camera.cameraStatus);
         }
     }
 
@@ -98,6 +96,7 @@ Page {
                     webSocket.url = "ws://"+recIp.text+":"+recPort.text;
                     console.log(webSocket.url);
                     webSocket.active = true;
+                    console.log("[SOCKET] socket status: " + webSocket.status);
                     //streamTimer.start();
                 }
             }
@@ -108,6 +107,7 @@ Page {
 
                 onClicked: {
                     webSocket.active = false;
+                    console.log("[SOCKET] socket status: " + webSocket.status);
                     streamTimer.stop();
                 }
             }

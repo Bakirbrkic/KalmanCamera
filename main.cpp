@@ -1,13 +1,13 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
-#include "ocvcameraframe.h"
+//#include "ocvcameraframe.h"
 
 int main(int argc, char *argv[])
 {
    // ocvCameraFrame *ocf = new ocvCameraFrame();
     //ocf->capture();
 
-    qmlRegisterType<ocvCameraFrame>("ba.bamzar.ocvCameraFrame",1,0,"OcvCameraFrame");
+    //qmlRegisterType<ocvCameraFrame>("ba.bamzar.ocvCameraFrame",1,0,"OcvCameraFrame");
 
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 

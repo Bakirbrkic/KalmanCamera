@@ -15,8 +15,8 @@ ApplicationWindow {
         CanvasPage {
         }
 
-//        CameraPage {
-//        }
+        CameraPage {
+        }
 
 
     }

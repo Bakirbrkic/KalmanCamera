@@ -5,6 +5,7 @@
 #include "opencv2/highgui.hpp"
 
 #include <QImage>
+#include <echoclient.h>
 #include <QObject>
 
 class ocvCameraFrame : public QObject
@@ -15,6 +16,9 @@ class ocvCameraFrame : public QObject
     Q_PROPERTY(QImage captureImage READ captureImg)
 
 public:
+    QUrl sockUrl;
+    EchoClient *client;
+
     explicit ocvCameraFrame(QObject *parent = nullptr);
 
     QString capture();

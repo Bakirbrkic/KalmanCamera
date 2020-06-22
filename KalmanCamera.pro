@@ -1,4 +1,5 @@
 QT += quick
+QT += websockets
 
 CONFIG += c++11
 
@@ -14,16 +15,15 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-        liveimageprovider.cpp \
         main.cpp \
-        ocvcameraframe.cpp
+        #ocvcameraframe.cpp
 
 RESOURCES += qml.qrc
 
 # OpenCV
-INCLUDEPATH += /usr/local/include/opencv4
-LIBS += -L/usr/local/lib
-LIBS += $(shell pkg-config opencv4 --libs)
+#INCLUDEPATH += /usr/local/include/opencv4
+#LIBS += -L/usr/local/lib
+#LIBS += $(shell pkg-config opencv4 --libs)
 
 # Additional import path used to resolve QML modules in Qt Creator's code model
 QML_IMPORT_PATH =
@@ -36,6 +36,4 @@ qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
-HEADERS += \
-    liveimageprovider.h \
-    ocvcameraframe.h
+HEADERS +=
