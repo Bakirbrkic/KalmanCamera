@@ -2,6 +2,7 @@ import QtQuick 2.12
 import QtQuick.Controls 2.5
 import QtMultimedia 5.12
 import QtWebSockets 1.1
+import ba.bamzar.img2base64 1.0
 
 
 Page {
@@ -26,6 +27,16 @@ Page {
         active: false
     }
 
+    Img2base64{
+        id:i2b
+
+        onEncoded: {
+            console.log("[IMG_2_BASE64] encoded!");
+            photoPreview.source = encode2base64;
+            //console.log("[IMG_2_BASE64] base64: " + encode2base64);
+        }
+    }
+
     Camera {
         id: camera
         //captureMode: Camera.CaptureViewfinder
@@ -34,7 +45,7 @@ Page {
 
             onImageCaptured: {
                 // Show the preview in an Image
-                photoPreview.source = preview;
+                //photoPreview.source = preview;
 
                 //webSocket.sendBinaryMessage(0x1);
                 //webSocket.sendBinaryMessage(preview);
@@ -42,6 +53,7 @@ Page {
             }
             onImageSaved: {
                 console.log("[CAMERA] saved to: " + path);
+                i2b.encode2base64 = path;
                 //webSocket.sendBinaryMessage(ba);
             }
         }
