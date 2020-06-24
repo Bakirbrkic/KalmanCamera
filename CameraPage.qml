@@ -7,6 +7,7 @@ import ba.bamzar.img2base64 1.0
 
 Page {
     id: cameraPage
+
     WebSocket{
         id: webSocket
         //url: //"ws://"+ip.localIP+":12350"
@@ -20,9 +21,14 @@ Page {
         onStatusChanged: if (webSocket.status == WebSocket.Error) {
                              console.log("[SOCKET] Error: " + webSocket.errorString)
                          } else if (webSocket.status == WebSocket.Open) {
-                            console.log("[SOCKET] Socket is open!");
+                             console.log("[SOCKET] Socket is open!");
+                             startSock.visible = false;
+                             toggleSock.visible = true;
+                             stopSock.visible = true;
+                             recIp.color = "#00ff00";
                          } else if (webSocket.status == WebSocket.Closed) {
-                            console.log("[SOCKET] Socket is closed");
+                             console.log("[SOCKET] Socket is closed");
+                             recIp.color = "#ff0000";
                          }
         active: false
     }
@@ -31,7 +37,7 @@ Page {
         id:i2b
 
         onEncoded: {
-            console.log("[IMG_2_BASE64] encoded!");
+            console.log("[IMG_2_BASE64] encoding done");
             photoPreview.source = encode2base64;
             //console.log("[IMG_2_BASE64] base64: " + encode2base64);
         }
@@ -40,6 +46,7 @@ Page {
     Camera {
         id: camera
         //captureMode: Camera.CaptureViewfinder
+        cameraState: Camera.UnloadedState;
 
         imageCapture {
 
@@ -58,14 +65,26 @@ Page {
             }
         }
 
+        onCameraStateChanged: {
+            if(cameraState == Camera.UnloadedState){
+                console.log("[CAMERA] camera not loaded");
+            }
+            else if(cameraState == Camera.LoadedState){
+                console.log("[CAMERA] camera loaded");
+                f.focusMode = Camera.FocusContinuous;
+                f.focusPointMode = Camera.FocusPointAuto;
+            }
+        }
+
         focus {
+            id: f
             focusMode: Camera.FocusContinuous
             focusPointMode: Camera.FocusPointAuto
         }
 
         onCameraStatusChanged: {
             if(camera.cameraStatus == Camera.LoadedStatus){
-                console.log("[CAMERA] loaded" + camera.cameraStatus);
+                console.log("[CAMERA] loaded, status: " + camera.cameraStatus);
                 var res = camera.imageCapture.supportedResolutions;
                 camera.imageCapture.resolution = res[0];//res[Math.floor(res.length/4)];
                 //camera.imageCapture.capture();
@@ -78,49 +97,101 @@ Page {
 
     Column {
         anchors.fill: parent
+
+        Row{
+            height: cameraPage.height*0.1
+            TextField{
+                width: cameraPage.width*0.70
+                height: cameraPage.height*0.1
+                id: recIp
+                text: "192.168.10.100"
+                horizontalAlignment: Text.AlignHCenter
+                color: "#ff0000"
+
+                selectByMouse: true
+            }
+            Text {
+                width: cameraPage.width*0.05
+                color: "#ffffff"
+                text: ":"
+                anchors.verticalCenter: parent.verticalCenter
+                font.pointSize: 22
+            }
+            TextField{
+                width: cameraPage.width*0.25
+                height: cameraPage.height*0.1
+                id: recPort
+                text: "20000"
+
+                selectByMouse: true
+            }
+        }
+
+
         Row{
             height: cameraPage.height*0.1
             Image {
                 id: photoPreview
                 fillMode: Image.PreserveAspectFit
-                height: 100
+                height: cameraPage.height*0.1
                 width: cameraPage.width*0.2
-            }
-            TextField{
-                width: cameraPage.width*0.25
-                id: recIp
-                text: "192.168.10.100"
-            }
-            Text {
-                text: ":"
-            }
-            TextField{
-                width: cameraPage.width*0.15
-                id: recPort
-                text: "20000"
             }
             Button{
                 id: startSock
-                width: cameraPage.width*0.2
-                text: "Start"
+                width: cameraPage.width*0.6
+                height: cameraPage.height*0.1
+                text: "Connect Socket"
+                flat: false
 
                 onClicked: {
-                    webSocket.url = "ws://"+recIp.text+":"+recPort.text;
+                    if(recPort.text != ".")
+                        webSocket.url = "ws://"+recIp.text+":"+recPort.text;
+                    else
+                        webSocket.url = "ws://"+recIp.text;
                     console.log(webSocket.url);
                     webSocket.active = true;
                     console.log("[SOCKET] socket status: " + webSocket.status);
+
+                    //toggleSock.visible = true;
+
                     //streamTimer.start();
                 }
             }
             Button{
-                id: stopSock
-                width: cameraPage.width*0.2
-                text: "Stop"
+                id: toggleSock
+                width: cameraPage.width*0.3
+                height: cameraPage.height*0.1
+                text: webSocket.active ? "Pause Socket" : "Resume Socket";
+                visible: false;
 
                 onClicked: {
+                    if(webSocket.active == true && toggleSock.text == "Pause Socket"){
+                        webSocket.active = false;
+                        console.log("[SOCKET] socket status: " + webSocket.status);
+                    } else if(webSocket.active == false && toggleSock.text == "Resume Socket"){
+                        webSocket.active = true;
+                        console.log("[SOCKET] socket status: " + webSocket.status);
+                    }
+                    //streamTimer.stop();
+                }
+            }
+            Button{
+                id: stopSock
+                width: cameraPage.width*0.3
+                height: cameraPage.height*0.1
+                text: "Disonnect Socket"
+
+                visible: false;
+
+                onClicked: {
+                    webSocket.url = "";
                     webSocket.active = false;
                     console.log("[SOCKET] socket status: " + webSocket.status);
-                    streamTimer.stop();
+                    toggleSock.visible = false;
+                    startSock.visible = true;
+                    stopSock.visible = false;
+
+                    //streamTimer.start();
                 }
             }
         }
@@ -128,7 +199,7 @@ Page {
 
 
         Row{
-            height: cameraPage.height*0.9
+            height: cameraPage.height*0.7
             VideoOutput {
                 autoOrientation: true;
                 id: viewfinder
@@ -147,6 +218,38 @@ Page {
                 }
             }
         }
+
+
+        Row{
+            height: cameraPage.height*0.1
+
+            Switch{
+                id: cameraSwitch
+                height: cameraPage.height*0.1
+                text: "Camera"
+
+                onToggled: {
+                    console.log("[CAMERA SWITCH] " + cameraSwitch.position)
+                    if(camera.cameraState == Camera.UnloadedState && cameraSwitch.position == 1){
+                        console.log("[CAMERA] camera will start loading");
+                        camera.cameraState = Camera.LoadedState;
+                        camera.start();
+                    }
+                    else if(camera.cameraState == 2 && cameraSwitch.position == 0){
+                        console.log("[CAMERA] camera will disconnect");
+                        camera.stop();
+                        camera.cameraState = Camera.UnloadedState;
+                    }
+                }
+            }
+
+            Button{
+                width: cameraPage.width - cameraSwitch.width
+                height: cameraPage.height*0.1
+                text: "Start Sending Frames"
+            }
+        }
+
     }
 
     Timer{
@@ -158,7 +261,7 @@ Page {
         onTriggered: {
             ocf.capture;
             //if(webSocket.status == WebSocket.Open)
-                //camera.imageCapture.capture();
+            //camera.imageCapture.capture();
         }
     }
 

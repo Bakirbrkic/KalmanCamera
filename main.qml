@@ -18,7 +18,7 @@ ApplicationWindow {
         CameraPage {
         }
 
-
+        interactive:false
     }
 
     footer: TabBar {
