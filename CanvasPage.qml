@@ -230,21 +230,68 @@ Page {
         id: noiseSettings
 
         anchors.centerIn: parent
-        width: parent.width-40
-        height: 400
+        width: parent.width-20
         modal: true
         focus: true
-        padding: 10
-        margins: 20
-        transformOrigin: Popup.Center
+        padding: 0
+        margins: 10
+        transformOrigin: Popup.Top
         closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
 
         Column{
+            width: parent.width-20
+            spacing: 10
+            padding: 10
+
             Text {
-                anchors.horizontalCenter: noiseSettings.Center
+                anchors.horizontalCenter: parent.horizontalCenter
+                font.pointSize: 16
+                color: "#ffffff"
                 text: "Noise Settings"
             }
+            Row{
+                Label{
+                    text: "Noise Interval : "
+                }
+                Label{
+                    text: noiseSlider.value + " ms"
+                }
+            }
+
+            Slider{
+                id: noiseSlider
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: parent.width-40
+                value: noiseTimer.interval
+                stepSize: 10
+                from: 100
+                to: 1000
+
+                onMoved: {
+                    saved.text = "Settings have been edited, but not saved";
+                    saved.color = "#ff0000";
+                }
+            }
+
+            Text {
+                id: saved
+                text: "Settings have been saved"
+                color: "#00ff00"
+            }
+
+            Button{
+                id: saveNoiseSettings
+                anchors.horizontalCenter: parent.horizontalCenter
+                text: "Save Noise Settings"
+
+                onPressed: {
+                    noiseTimer.interval = noiseSlider.value;
+                    saved.text = "Settings have been saved"
+                    saved.color = "#00ff00"
+                }
+            }
         }
+
 
 
     }
