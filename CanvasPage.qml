@@ -158,21 +158,27 @@ Page {
                         crt.lastY = mouseY;
                         var s = {x: parseInt(mouseX.toFixed(0)), y: parseInt(mouseY.toFixed(0)), maxX: canvPage.width, maxY: canvPage.height*0.8, start: true}
                         if(crt.sendToSock)
-                            webSocket.sendTextMessage(JSON.stringify(s));
+                            s.noise = false;
+                        else
+                            s.noise = true;
+                        webSocket.sendTextMessage(JSON.stringify(s));
                     }
 
                     onPositionChanged: {
                         crt.requestPaint();
                         var s = {x: parseInt(mouseX.toFixed(0)), y: parseInt(mouseY.toFixed(0)), maxX: canvPage.width, maxY: canvPage.height*0.8, start: false}
                         if(crt.sendToSock)
-                            webSocket.sendTextMessage(JSON.stringify(s));
+                            s.noise = false;
+                        else
+                            s.noise = true;
+                        webSocket.sendTextMessage(JSON.stringify(s));
                     }
                 }
 
                 onPaint: {
                     var ctx = getContext("2d");
                     ctx.lineWidth = 5;
-                    ctx.strokeStyle = "#ffffff";
+                    ctx.strokeStyle = sendToSock ? "#ffffff" : "#00ffff";
                     ctx.beginPath();
                     ctx.moveTo(lastX, lastY);
                     lastX = tch.mouseX;
@@ -194,7 +200,7 @@ Page {
                 }
             }
             Button{
-                width: canvPage.width*0.7
+                width: canvPage.width*0.4
                 height: canvPage.height*0.1
                 text: noiseTimer.running ? "Stop Noise" : "Start Noise"
 
@@ -207,7 +213,39 @@ Page {
                     }
                 }
             }
+            Button{
+                width: canvPage.width*0.3
+                height: canvPage.height*0.1
+                text: "Edit Noise"
+
+                onPressed: {
+                    noiseSettings.open();
+                }
+            }
         }
+
+    }
+
+    Popup {
+        id: noiseSettings
+
+        anchors.centerIn: parent
+        width: parent.width-40
+        height: 400
+        modal: true
+        focus: true
+        padding: 10
+        margins: 20
+        transformOrigin: Popup.Center
+        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
+
+        Column{
+            Text {
+                anchors.horizontalCenter: noiseSettings.Center
+                text: "Noise Settings"
+            }
+        }
+
 
     }
 
@@ -225,3 +263,9 @@ Page {
         }
     }
 }
+
+/*##^##
+Designer {
+    D{i:0;autoSize:true;height:480;width:640}
+}
+##^##*/
