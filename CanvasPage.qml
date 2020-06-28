@@ -139,7 +139,11 @@ Page {
                 height: canvPage.height*0.7
                 width: canvPage.width
 
+                property int noiseType: noiseTypeGroup.checkedButton.noiseType
                 property bool sendToSock: true
+                property bool fuzzyOn: false
+                property int fuzziness: 10
+
                 property int lastX: 0
                 property int lastY: 0
 
@@ -161,6 +165,10 @@ Page {
                             s.noise = false;
                         else
                             s.noise = true;
+                        if(crt.fuzzyOn){
+                            s.y += crt.fuzziness;
+                            s.x += crt.fuzziness;
+                        }
                         webSocket.sendTextMessage(JSON.stringify(s));
                     }
 
@@ -171,6 +179,10 @@ Page {
                             s.noise = false;
                         else
                             s.noise = true;
+                        if(crt.fuzzyOn){
+                            s.y += crt.fuzziness;
+                            s.x += crt.fuzziness;
+                        }
                         webSocket.sendTextMessage(JSON.stringify(s));
                     }
                 }
@@ -178,11 +190,19 @@ Page {
                 onPaint: {
                     var ctx = getContext("2d");
                     ctx.lineWidth = 5;
-                    ctx.strokeStyle = sendToSock ? "#ffffff" : "#00ffff";
+                    if(!sendToSock && !fuzzyOn){ //com delay
+                        ctx.strokeStyle = "#00ffff";
+                    } else if(fuzzyOn && sendToSock){ //fuzzy
+                        ctx.strokeStyle = "#ff00ff";
+                    } else if(fuzzyOn && !sendToSock){ //both
+                        ctx.strokeStyle = "#ffff00";
+                    } else //no noise
+                        ctx.strokeStyle = "#ffffff";
+
                     ctx.beginPath();
                     ctx.moveTo(lastX, lastY);
-                    lastX = tch.mouseX;
-                    lastY = tch.mouseY;
+                    lastX = crt.fuzzyOn ? tch.mouseX + crt.fuzziness : tch.mouseX;
+                    lastY = crt.fuzzyOn ? tch.mouseY + crt.fuzziness : tch.mouseY;
                     ctx.lineTo(lastX, lastY);
                     ctx.stroke();
                 }
@@ -205,9 +225,11 @@ Page {
                 text: noiseTimer.running ? "Stop Noise" : "Start Noise"
 
                 onPressed: {
+                    console.log("[NOISE] Selected noise type: " + noiseTypeGroup.checkedButton.noiseType + " " + noiseTypeGroup.checkedButton.text);
                     if(noiseTimer.running){
                         noiseTimer.running=false;
-                        crt.sendToSock = true
+                        crt.sendToSock = true;
+                        crt.fuzzyOn = false;
                     }else{
                         noiseTimer.running=true;
                     }
@@ -243,12 +265,45 @@ Page {
             spacing: 10
             padding: 10
 
+
             Text {
                 anchors.horizontalCenter: parent.horizontalCenter
                 font.pointSize: 16
                 color: "#ffffff"
                 text: "Noise Settings"
             }
+
+            ButtonGroup {
+                id: noiseTypeGroup
+                buttons: noiseTypeGroupButtons.children
+
+                onClicked: {
+                    console.log("[NOISE TYPE] selected: " + noiseTypeGroup.checkedButton.noiseType + " " + noiseTypeGroup.checkedButton.text);
+                    crt.sendToSock = true;
+                }
+            }
+
+            Label{
+                text: "Noise Type"
+            }
+
+            Row{
+                id: noiseTypeGroupButtons
+                RadioButton {
+                    text: "Communication delay"
+                    checked: true
+                    property int noiseType: 0
+                }
+                RadioButton {
+                    text: "Fuzzy coordinats"
+                    property int noiseType: 1
+                }
+                RadioButton {
+                    text: "Both"
+                    property int noiseType: 2
+                }
+            }
+
             Row{
                 Label{
                     text: "Noise Interval : "
@@ -303,10 +358,19 @@ Page {
         running: false
 
         onTriggered: {
-            if(crt.sendToSock)
-                crt.sendToSock = false
-            else
+            if(crt.fuzzyOn == false && (crt.noiseType === 1 || crt.noiseType === 2)){
+                var sign = Math.random() < 0.5 ? -1 : 1;
+                crt.fuzziness *= sign;
+                crt.fuzzyOn = true;
+            } else if(crt.fuzzyOn == true && (crt.noiseType === 1 || crt.noiseType === 2)){
+                crt.fuzzyOn = false;
+            }
+
+            if(crt.sendToSock == false && (crt.noiseType === 0 || crt.noiseType === 2)){
                 crt.sendToSock = true
+            }
+            else if(crt.sendToSock == true && (crt.noiseType === 0 || crt.noiseType === 2))
+                crt.sendToSock = false
         }
     }
 }
