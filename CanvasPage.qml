@@ -229,6 +229,7 @@ Page {
                     console.log("[NOISE] Selected noise type: " + noiseTypeGroup.checkedButton.noiseType + " " + noiseTypeGroup.checkedButton.text);
                     if(noiseTimer.running){
                         noiseTimer.running = false;
+                        fuzzyTimer.running = false;
                         crt.sendToSock = true;
                         crt.fuzzyOn = false;
                     }else{
@@ -311,22 +312,39 @@ Page {
                     text: "Communication Delay Interval: "
                 }
                 Label{
-                    text: noiseSlider.value + " ms"
+                    text: noiseSlider.enabled ? noiseSlider.value + " ms" : "Random [10, 500] ms"
                 }
             }
 
-            Slider{
-                id: noiseSlider
-                anchors.horizontalCenter: parent.horizontalCenter
-                width: parent.width-40
-                value: noiseTimer.interval
-                stepSize: 10
-                from: 100
-                to: 1000
+            Row{
+                Slider{
+                    id: noiseSlider
+                    width: noiseSettings.width-40-noiseRandBox.width
+                    value: noiseTimer.interval
+                    stepSize: 10
+                    from: 100
+                    to: 1000
 
-                onMoved: {
-                    saved.text = "Settings have been edited, but not saved";
-                    saved.color = "#ff0000";
+                    onMoved: {
+                        saved.text = "Settings have been edited, but not saved";
+                        saved.color = "#ff0000";
+                    }
+                }
+                CheckBox{
+                    id: noiseRandBox
+                    text: "Rand."
+
+                    onCheckStateChanged: {
+                        if(checkState == Qt.Checked){
+                            noiseSlider.value = 0;
+                            noiseSlider.enabled = false;
+                            noiseTimer.rand = true;
+                        } else {
+                            noiseSlider.value = 300;
+                            noiseSlider.enabled = true;
+                            noiseTimer.rand = false;
+                        }
+                    }
                 }
             }
 
@@ -335,22 +353,39 @@ Page {
                     text: "Fuzziness Interval: "
                 }
                 Label{
-                    text: fuzzySlider.value + " ms"
+                    text: fuzzySlider.enabled ? fuzzySlider.value + " ms" : "Random [1, 30] ms"
                 }
             }
 
-            Slider{
-                id: fuzzySlider
-                anchors.horizontalCenter: parent.horizontalCenter
-                width: parent.width-40
-                value: fuzzyTimer.interval
-                stepSize: 1
-                from: 1
-                to: 100
+            Row{
+                Slider{
+                    id: fuzzySlider
+                    width: noiseSettings.width-40-fuzzyRandBox.width
+                    value: fuzzyTimer.interval
+                    stepSize: 1
+                    from: 1
+                    to: 100
 
-                onMoved: {
-                    saved.text = "Settings have been edited, but not saved";
-                    saved.color = "#ff0000";
+                    onMoved: {
+                        saved.text = "Settings have been edited, but not saved";
+                        saved.color = "#ff0000";
+                    }
+                }
+                CheckBox{
+                    id: fuzzyRandBox
+                    text: "Rand."
+
+                    onCheckStateChanged: {
+                        if(checkState == Qt.Checked){
+                            fuzzySlider.value = 0;
+                            fuzzySlider.enabled = false;
+                            fuzzyTimer.rand = true;
+                        } else {
+                            fuzzySlider.value = 50;
+                            fuzzySlider.enabled = true;
+                            fuzzyTimer.rand = false;
+                        }
+                    }
                 }
             }
 
@@ -359,22 +394,39 @@ Page {
                     text: "Fuzziness Factor: "
                 }
                 Label{
-                    text: fuzzyAmountSlider.value + " px"
+                    text: fuzzyAmountSlider.enabled ? fuzzyAmountSlider.value + " px" : "Random  [1, 5] px"
                 }
             }
 
-            Slider{
-                id: fuzzyAmountSlider
-                anchors.horizontalCenter: parent.horizontalCenter
-                width: parent.width-40
-                value: crt.fuzzinessAmount
-                stepSize: 1
-                from: 1
-                to: 10
+            Row{
+                Slider{
+                    id: fuzzyAmountSlider
+                    width: noiseSettings.width-40-fuzzyAmountRandBox.width
+                    value: crt.fuzzinessAmount
+                    stepSize: 1
+                    from: 1
+                    to: 10
 
-                onMoved: {
-                    saved.text = "Settings have been edited, but not saved";
-                    saved.color = "#ff0000";
+                    onMoved: {
+                        saved.text = "Settings have been edited, but not saved";
+                        saved.color = "#ff0000";
+                    }
+                }
+                CheckBox{
+                    id: fuzzyAmountRandBox
+                    text: "Rand."
+
+                    onCheckStateChanged: {
+                        if(checkState == Qt.Checked){
+                            fuzzyAmountSlider.value = 0;
+                            fuzzyAmountSlider.enabled = false;
+                            fuzzyTimer.randAmount = true;
+                        } else {
+                            fuzzyAmountSlider.value = 50;
+                            fuzzyAmountSlider.enabled = true;
+                            fuzzyTimer.randAmount = false;
+                        }
+                    }
                 }
             }
 
@@ -409,12 +461,18 @@ Page {
         repeat: true;
         running: false
 
+        property bool rand: false
+
         onTriggered: {
+            if(rand){
+                interval = Math.floor(Math.random()*490)+10;
+            }
+
             if(crt.sendToSock == false && (crt.noiseType === 0 || crt.noiseType === 2)){
-                crt.sendToSock = true
+                crt.sendToSock = true;
             }
             else if(crt.sendToSock == true && (crt.noiseType === 0 || crt.noiseType === 2))
-                crt.sendToSock = false
+                crt.sendToSock = false;
         }
     }
 
@@ -424,7 +482,17 @@ Page {
         repeat: true;
         running: false
 
+        property bool rand: false
+        property bool randAmount: false
+
         onTriggered: {
+            if(rand){
+                interval = Math.floor(Math.random()*29)+1;
+            }
+            if(randAmount){
+                crt.fuzzinessAmount = Math.floor(Math.random()*4)+1;
+            }
+
             if(crt.fuzzyOn == false && (crt.noiseType === 1 || crt.noiseType === 2)){
                 var sign = Math.random() < 0.5 ? -1 : 1;
                 crt.fuzziness = crt.fuzzinessAmount * sign;
