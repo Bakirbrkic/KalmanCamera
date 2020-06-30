@@ -142,7 +142,8 @@ Page {
                 property int noiseType: noiseTypeGroup.checkedButton.noiseType
                 property bool sendToSock: true
                 property bool fuzzyOn: false
-                property int fuzziness: 10
+                property int fuzzinessAmount: 10
+                property int fuzziness: fuzzinessAmount
 
                 property int lastX: 0
                 property int lastY: 0
@@ -227,11 +228,12 @@ Page {
                 onPressed: {
                     console.log("[NOISE] Selected noise type: " + noiseTypeGroup.checkedButton.noiseType + " " + noiseTypeGroup.checkedButton.text);
                     if(noiseTimer.running){
-                        noiseTimer.running=false;
+                        noiseTimer.running = false;
                         crt.sendToSock = true;
                         crt.fuzzyOn = false;
                     }else{
-                        noiseTimer.running=true;
+                        noiseTimer.running = true;
+                        fuzzyTimer.running = true;
                     }
                 }
             }
@@ -306,7 +308,7 @@ Page {
 
             Row{
                 Label{
-                    text: "Noise Interval : "
+                    text: "Communication Delay Interval: "
                 }
                 Label{
                     text: noiseSlider.value + " ms"
@@ -328,6 +330,54 @@ Page {
                 }
             }
 
+            Row{
+                Label{
+                    text: "Fuzziness Interval: "
+                }
+                Label{
+                    text: fuzzySlider.value + " ms"
+                }
+            }
+
+            Slider{
+                id: fuzzySlider
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: parent.width-40
+                value: fuzzyTimer.interval
+                stepSize: 1
+                from: 1
+                to: 100
+
+                onMoved: {
+                    saved.text = "Settings have been edited, but not saved";
+                    saved.color = "#ff0000";
+                }
+            }
+
+            Row{
+                Label{
+                    text: "Fuzziness Factor: "
+                }
+                Label{
+                    text: fuzzyAmountSlider.value + " px"
+                }
+            }
+
+            Slider{
+                id: fuzzyAmountSlider
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: parent.width-40
+                value: crt.fuzzinessAmount
+                stepSize: 1
+                from: 1
+                to: 10
+
+                onMoved: {
+                    saved.text = "Settings have been edited, but not saved";
+                    saved.color = "#ff0000";
+                }
+            }
+
             Text {
                 id: saved
                 text: "Settings have been saved"
@@ -341,6 +391,8 @@ Page {
 
                 onPressed: {
                     noiseTimer.interval = noiseSlider.value;
+                    fuzzyTimer.interval = fuzzySlider.value;
+                    crt.fuzzinessAmount = fuzzyAmountSlider.value;
                     saved.text = "Settings have been saved"
                     saved.color = "#00ff00"
                 }
@@ -358,19 +410,28 @@ Page {
         running: false
 
         onTriggered: {
-            if(crt.fuzzyOn == false && (crt.noiseType === 1 || crt.noiseType === 2)){
-                var sign = Math.random() < 0.5 ? -1 : 1;
-                crt.fuzziness *= sign;
-                crt.fuzzyOn = true;
-            } else if(crt.fuzzyOn == true && (crt.noiseType === 1 || crt.noiseType === 2)){
-                crt.fuzzyOn = false;
-            }
-
             if(crt.sendToSock == false && (crt.noiseType === 0 || crt.noiseType === 2)){
                 crt.sendToSock = true
             }
             else if(crt.sendToSock == true && (crt.noiseType === 0 || crt.noiseType === 2))
                 crt.sendToSock = false
+        }
+    }
+
+    Timer{
+        id: fuzzyTimer
+        interval: 50
+        repeat: true;
+        running: false
+
+        onTriggered: {
+            if(crt.fuzzyOn == false && (crt.noiseType === 1 || crt.noiseType === 2)){
+                var sign = Math.random() < 0.5 ? -1 : 1;
+                crt.fuzziness = crt.fuzzinessAmount * sign;
+                crt.fuzzyOn = true;
+            } else if(crt.fuzzyOn == true && (crt.noiseType === 1 || crt.noiseType === 2)){
+                crt.fuzzyOn = false;
+            }
         }
     }
 }
