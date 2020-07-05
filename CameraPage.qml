@@ -40,6 +40,8 @@ Page {
             console.log("[IMG_2_BASE64] encoding done");
             photoPreview.source = encode2base64;
             //console.log("[IMG_2_BASE64] base64: " + encode2base64);
+
+            webSocket.sendTextMessage(encode2base64)
         }
     }
 
@@ -246,7 +248,16 @@ Page {
             Button{
                 width: cameraPage.width - cameraSwitch.width
                 height: cameraPage.height*0.1
-                text: "Start Sending Frames"
+                text: streamTimer.running ? "Stop Sending Frames" : "Start Sending Frames"
+
+                onPressed: {
+                    if(streamTimer.running)
+                        streamTimer.running = false;
+                    else
+                        streamTimer.running = true;
+
+                    console.log("[TIMER] timer running: " + streamTimer.running);
+                }
             }
         }
 
@@ -259,9 +270,8 @@ Page {
         running: false//true
 
         onTriggered: {
-            ocf.capture;
-            //if(webSocket.status == WebSocket.Open)
-            //camera.imageCapture.capture();
+            if(webSocket.status == WebSocket.Open)
+            camera.imageCapture.capture();
         }
     }
 
