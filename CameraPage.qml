@@ -47,6 +47,7 @@ Page {
 
     Camera {
         id: camera
+        deviceId: QtMultimedia.availableCameras[cameraSide.currentIndex].deviceId
         //captureMode: Camera.CaptureViewfinder
         cameraState: Camera.UnloadedState;
 
@@ -196,6 +197,18 @@ Page {
                     //streamTimer.start();
                 }
             }
+            ComboBox{
+                id: cameraSide
+                width: cameraPage.width*0.2
+                height: cameraPage.height*0.1
+
+                model: ["Main", "Selfie"]
+
+                onCurrentIndexChanged: {
+                    camera.deviceId = QtMultimedia.availableCameras[cameraSide.currentIndex].deviceId
+                }
+            }
+
         }
 
 
@@ -232,15 +245,25 @@ Page {
 
                 onToggled: {
                     console.log("[CAMERA SWITCH] " + cameraSwitch.position)
+                    try{
+                        console.log("[CAMERA SWITCH] available cameras: " + QtMultimedia.availableCameras[0].displayName + ", " + QtMultimedia.availableCameras[1].displayName)
+                    } catch(e) {
+                        console.log("[CAMERA SWITCH] no multiple cameras");
+                        cameraSide.visible = false;
+
+                    }
+
                     if(camera.cameraState == Camera.UnloadedState && cameraSwitch.position == 1){
                         console.log("[CAMERA] camera will start loading");
                         camera.cameraState = Camera.LoadedState;
                         camera.start();
+                        cameraSide.visible = false;
                     }
                     else if(camera.cameraState == 2 && cameraSwitch.position == 0){
                         console.log("[CAMERA] camera will disconnect");
                         camera.stop();
                         camera.cameraState = Camera.UnloadedState;
+                        cameraSide.visible = true;
                     }
                 }
             }
