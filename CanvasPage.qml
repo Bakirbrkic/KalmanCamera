@@ -170,6 +170,7 @@ Page {
                             s.y += crt.fuzziness;
                             s.x += crt.fuzziness;
                         }
+                        s.base64 = false;
                         webSocket.sendTextMessage(JSON.stringify(s));
                     }
 
@@ -184,6 +185,7 @@ Page {
                             s.y += crt.fuzziness;
                             s.x += crt.fuzziness;
                         }
+                        s.base64 = false;
                         webSocket.sendTextMessage(JSON.stringify(s));
                     }
                 }

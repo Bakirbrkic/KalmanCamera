@@ -40,8 +40,10 @@ Page {
             console.log("[IMG_2_BASE64] encoding done");
             photoPreview.source = encode2base64;
             //console.log("[IMG_2_BASE64] base64: " + encode2base64);
-
-            webSocket.sendTextMessage(encode2base64)
+            var s = {base64: true};
+            s.img = encode2base64;
+            //console.log("[IMG_2_BASE64] JSON MESSAGE: " + JSON.stringify(s));
+            webSocket.sendTextMessage(JSON.stringify(s));
         }
     }
 
@@ -269,7 +271,7 @@ Page {
             }
 
             Button{
-                width: cameraPage.width - cameraSwitch.width
+                width: cameraPage.width - cameraSwitch.width - fpsButton.width
                 height: cameraPage.height*0.1
                 text: streamTimer.running ? "Stop Sending Frames" : "Start Sending Frames"
 
@@ -282,13 +284,26 @@ Page {
                     console.log("[TIMER] timer running: " + streamTimer.running);
                 }
             }
+            ComboBox{
+                id:fpsButton
+                width: cameraPage.width*0.2
+                height: cameraPage.height*0.1
+
+                model: ["1", "5", "10", "15", "20"]
+
+                onCurrentTextChanged: {
+                    var div = parseInt(currentText);
+                    streamTimer.interval = 1000/div;
+                    console.log("[TIMER] current interval: " + streamTimer.interval);
+                }
+            }
         }
 
     }
 
     Timer{
         id: streamTimer
-        interval: 40
+        interval: 1000
         repeat: true
         running: false//true
 
