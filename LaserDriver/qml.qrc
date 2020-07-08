@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/">
+        <file>main.qml</file>
+        <file>canvasPage.qml</file>
+        <file>qtquickcontrols2.conf</file>
+        <file>clientPage.qml</file>
+    </qresource>
+</RCC>
