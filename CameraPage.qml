@@ -135,11 +135,22 @@ Page {
 
         Row{
             height: cameraPage.height*0.1
-            Image {
-                id: photoPreview
-                fillMode: Image.PreserveAspectFit
-                height: cameraPage.height*0.1
+            VideoOutput {
+                autoOrientation: true;
+                id: viewfinder
+                source: camera
+                focus : visible // to receive focus and capture key events when visible
                 width: cameraPage.width*0.2
+                height: parent.height
+
+                MouseArea {
+                    anchors.fill: parent;
+
+                    onPressed: {
+                        camera.imageCapture.capture();
+                    }
+
+                }
             }
             Button{
                 id: startSock
@@ -217,13 +228,11 @@ Page {
 
         Row{
             height: cameraPage.height*0.7
-            VideoOutput {
-                autoOrientation: true;
-                id: viewfinder
-                source: camera
-                focus : visible // to receive focus and capture key events when visible
-                width: cameraPage.width
+            Image {
+                id: photoPreview
+                fillMode: Image.PreserveAspectFit
                 height: parent.height
+                width: cameraPage.width
 
                 MouseArea {
                     anchors.fill: parent;
