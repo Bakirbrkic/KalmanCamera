@@ -13,19 +13,27 @@ Page {
             //console.log("[SOCKET][TEXT] Received message: " + message);
             var s = JSON.parse(message);
             if(!s.base64){
+                console.log(message);
                 if(s.start){
-                    crt.lastX = s.x;
-                    crt.lastY = s.y;
-                    crt.oldX = s.x;
-                    crt.oldY = s.y;
+                    crt.lastX = (s.x / s.maxX) * crt.height*0.8;
+                    crt.lastY = (s.y / s.maxX) * crt.height*0.8;
+                    crt.oldX = (s.x / s.maxX) * crt.height*0.8;
+                    crt.oldY = (s.y / s.maxX) * crt.height*0.8;
                     crt.requestPaint();
                 } else{
-                    crt.lastX = s.x;
-                    crt.lastY = s.y;
+                    crt.lastX = (s.x / s.maxX) * crt.height*0.8;
+                    crt.lastY = (s.y / s.maxX) * crt.height*0.8;
                     crt.requestPaint();
                 }
                 if(getSerialMsgTimer.send == false){
-                    var m = "G0 X" + s.y + " Y" + s.x;
+                    var m = "G";
+                    if (relativeSw.position == 1){
+                        s.x = s.x * (20)
+                        s.y = s.y * (20)
+                        m += "91 ";
+                    }else
+                        m += "0 "
+                    m += "X" + s.y + " Y" + s.x;
                     comBox.text = m;
                     //serial.newMessage = "$";//s;//"$J=G91X1.0Y1.0F1000";
                     getSerialMsgTimer.com = m;
@@ -87,11 +95,6 @@ Page {
 
         Row{
             height: canvPage.height*0.1
-            Rectangle {
-                height: canvPage.height*0.1
-                color: "#00000000"
-                width: canvPage.width*0.2
-            }
             Button{
                 id: startSock
                 width: canvPage.width*0.6
@@ -149,6 +152,15 @@ Page {
 
                     //streamTimer.start();
                 }
+            }
+            Rectangle {
+                height: canvPage.height*0.1
+                color: "#00000000"
+                width: canvPage.width*0.1
+            }
+            Switch{
+                id: relativeSw
+                text: "relative move"
             }
         }
 
