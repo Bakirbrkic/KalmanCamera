@@ -49,7 +49,7 @@ Page {
 
     Camera {
         id: camera
-        //deviceId: QtMultimedia.availableCameras[cameraSide.currentIndex].deviceId
+        deviceId: QtMultimedia.availableCameras[cameraSide.currentIndex].deviceId
         //captureMode: Camera.CaptureViewfinder
         cameraState: Camera.UnloadedState;
 
@@ -210,7 +210,7 @@ Page {
                     //streamTimer.start();
                 }
             }
- /*           ComboBox{
+            ComboBox{
                 id: cameraSide
                 width: cameraPage.width*0.2
                 height: cameraPage.height*0.1
@@ -220,7 +220,7 @@ Page {
                 onCurrentIndexChanged: {
                     camera.deviceId = QtMultimedia.availableCameras[cameraSide.currentIndex].deviceId
                 }
-            }*/
+            }
 
         }
 
@@ -260,7 +260,7 @@ Page {
                         console.log("[CAMERA SWITCH] available cameras: " + QtMultimedia.availableCameras[0].displayName + ", " + QtMultimedia.availableCameras[1].displayName)
                     } catch(e) {
                         console.log("[CAMERA SWITCH] no multiple cameras");
-                        //cameraSide.visible = false;
+                        cameraSide.visible = false;
 
                     }
 
