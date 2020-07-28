@@ -33,7 +33,7 @@ Page {
                         m += "91 ";
                     }else
                         m += "0 "
-                    m += "X" + s.y + " Y" + s.x;
+                    m += /*"X" + s.y + */" Y" + s.x;
                     comBox.text = m;
                     //serial.newMessage = "$";//s;//"$J=G91X1.0Y1.0F1000";
                     getSerialMsgTimer.com = m;
